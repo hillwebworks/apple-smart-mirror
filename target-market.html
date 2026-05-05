@@ -87,9 +87,9 @@
 
     /* ─── Content ─── */
     .page-content {
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 72px 24px 100px;
+      padding: 72px 32px 100px;
     }
 
     .back-link { display: inline-block; font-size: 15px; color: var(--blue); text-decoration: none; font-weight: 500; margin-bottom: 56px; }
@@ -99,11 +99,11 @@
     /* ─── Media block: image beside caption ─── */
     .media-block {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
+      grid-template-columns: 3fr 1fr;
+      gap: 40px;
       align-items: center;
-      margin-bottom: 56px;
-      padding-bottom: 56px;
+      margin-bottom: 64px;
+      padding-bottom: 64px;
       border-bottom: 1px solid rgba(0,0,0,0.08);
     }
     .media-block:last-child {
@@ -136,8 +136,8 @@
       margin-bottom: 10px;
     }
     .media-caption p {
-      font-size: 17px;
-      line-height: 1.75;
+      font-size: 15px;
+      line-height: 1.7;
       color: var(--mid);
     }
 
@@ -157,7 +157,7 @@
       .nav-actions a { display: none; }
       .hamburger { display: flex; }
       .mobile-menu { display: block; }
-      .media-block, .media-block.flip { grid-template-columns: 1fr; direction: ltr; }
+      .media-block, .media-block.flip { grid-template-columns: 1fr; direction: ltr; gap: 24px; }
     }
     @media (max-width: 1180px) {
       .nav-links a { padding: 5px 6px; font-size: 12px; }
