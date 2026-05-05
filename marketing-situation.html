@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Current Marketing Situation — Apple Smart Mirror</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:  #1d1d1f;
+      --mid:    #6e6e73;
+      --subtle: #86868b;
+      --light:  #f5f5f7;
+      --white:  #ffffff;
+      --blue:   #0071e3;
+      --nav-bg: rgba(245,245,247,0.92);
+      --radius: 18px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                   "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      color: var(--black);
+      background: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ─── Nav ─── */
+    .site-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      height: 52px;
+      background: var(--nav-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.12);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.7) inset, 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .nav-inner {
+      display: grid;
+      grid-template-columns: minmax(36px, auto) minmax(0, 1fr) auto;
+      align-items: center;
+      height: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      gap: 8px;
+    }
+    .nav-logo { display: flex; align-items: center; justify-content: center; text-decoration: none; line-height: 0; }
+    .nav-logo img { display: block; height: 22px; width: auto; }
+    .nav-links { display: flex; align-items: center; justify-content: center; list-style: none; gap: 0; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-links a { display: block; padding: 6px 10px; font-size: 13px; color: var(--black); text-decoration: none; opacity: 0.8; transition: opacity 0.15s; white-space: nowrap; letter-spacing: -0.01em; }
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a.active { opacity: 1; font-weight: 600; }
+    .nav-actions { display: flex; align-items: center; justify-content: flex-end; gap: 18px; flex-shrink: 0; padding-left: 4px; }
+    .nav-actions a { color: var(--black); text-decoration: none; opacity: 0.8; transition: opacity 0.15s; display: flex; align-items: center; }
+    .nav-actions a:hover { opacity: 1; }
+    .nav-actions svg { width: 17px; height: 17px; fill: var(--black); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+    .hamburger span { width: 20px; height: 1.5px; background: var(--black); border-radius: 2px; display: block; transition: 0.25s ease; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+    .mobile-menu { display: none; position: fixed; top: 52px; left: 0; right: 0; background: rgba(255,255,255,0.97); backdrop-filter: blur(20px); z-index: 999; padding: 12px 22px 20px; opacity: 0; transform: translateY(-6px); transition: opacity 0.2s, transform 0.2s; pointer-events: none; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .mobile-menu.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .mobile-menu a { display: block; font-size: 16px; color: var(--black); text-decoration: none; padding: 13px 0; border-bottom: 1px solid rgba(0,0,0,0.06); opacity: 0.8; }
+    .mobile-menu a:last-child { border-bottom: none; }
+    .mobile-menu a:hover { opacity: 1; }
+
+    /* ─── Page Hero ─── */
+    .page-hero {
+      padding: 110px 24px 64px;
+      text-align: center;
+      background: var(--light);
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+    .page-hero .breadcrumb { font-size: 13px; color: var(--subtle); margin-bottom: 16px; }
+    .page-hero .breadcrumb a { color: var(--blue); text-decoration: none; }
+    .page-hero .breadcrumb a:hover { text-decoration: underline; }
+    .page-hero .label { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); margin-bottom: 14px; }
+    .page-hero h1 { font-size: clamp(32px, 6vw, 64px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.05; color: var(--black); }
+
+    /* ─── Table of contents ─── */
+    .toc-wrap {
+      max-width: 760px;
+      margin: 56px auto 0;
+      padding: 0 24px;
+    }
+    .toc {
+      background: var(--light);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .toc h3 { font-size: 13px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--subtle); margin-bottom: 14px; }
+    .toc ol { list-style: none; counter-reset: toc-counter; padding: 0; }
+    .toc ol li { counter-increment: toc-counter; display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .toc ol li:last-child { border-bottom: none; }
+    .toc ol li::before { content: counter(toc-counter, decimal-leading-zero); font-size: 11px; color: var(--subtle); min-width: 22px; }
+    .toc ol li a { font-size: 15px; color: var(--blue); text-decoration: none; font-weight: 500; }
+    .toc ol li a:hover { text-decoration: underline; }
+
+    /* ─── Content body ─── */
+    .page-content {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 72px 24px 100px;
+    }
+
+    .back-link { display: inline-block; font-size: 15px; color: var(--blue); text-decoration: none; font-weight: 500; margin-bottom: 56px; }
+    .back-link::before { content: '← '; }
+    .back-link:hover { text-decoration: underline; }
+
+    /* Section block */
+    .content-block { margin-bottom: 72px; }
+    .content-block:last-child { margin-bottom: 0; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--subtle);
+      margin-bottom: 10px;
+    }
+
+    .content-block h2 {
+      font-size: clamp(24px, 4vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--black);
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .content-block h3 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--black);
+      margin: 32px 0 12px;
+    }
+
+    .content-block p {
+      font-size: 17px;
+      line-height: 1.75;
+      color: var(--mid);
+      margin-bottom: 20px;
+    }
+    .content-block p:last-child { margin-bottom: 0; }
+
+    /* Competitor cards */
+    .competitor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 28px 0;
+    }
+    .competitor-card {
+      background: var(--light);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .competitor-card .name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--black);
+      margin-bottom: 8px;
+    }
+    .competitor-card .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 980px;
+      margin-bottom: 10px;
+    }
+    .tag-primary { background: rgba(255,59,48,0.1); color: #d70015; }
+    .tag-secondary { background: rgba(0,113,227,0.1); color: #0071e3; }
+    .tag-minor { background: rgba(0,0,0,0.07); color: var(--subtle); }
+    .competitor-card p { font-size: 14px; line-height: 1.6; color: var(--subtle); margin: 0; }
+
+    /* SWOT grid */
+    .swot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 8px 0;
+    }
+    .swot-cell {
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .swot-cell.strengths  { background: #e8f5e9; }
+    .swot-cell.weaknesses { background: #fce4ec; }
+    .swot-cell.opportunities { background: #e3f2fd; }
+    .swot-cell.threats    { background: #fff8e1; }
+    .swot-cell h4 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .swot-cell.strengths h4    { color: #2e7d32; }
+    .swot-cell.weaknesses h4   { color: #c62828; }
+    .swot-cell.opportunities h4 { color: #1565c0; }
+    .swot-cell.threats h4      { color: #f57f17; }
+    .swot-cell ul { list-style: none; padding: 0; }
+    .swot-cell ul li {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--black);
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      padding-left: 16px;
+      position: relative;
+    }
+    .swot-cell ul li:last-child { border-bottom: none; }
+    .swot-cell ul li::before { content: '•'; position: absolute; left: 0; opacity: 0.4; }
+
+    /* PEST grid */
+    .pest-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 8px 0;
+    }
+    .pest-cell {
+      background: var(--light);
+      border-radius: var(--radius);
+      padding: 28px;
+      border-top: 3px solid transparent;
+    }
+    .pest-cell.political    { border-color: #5e35b1; }
+    .pest-cell.economic     { border-color: #00897b; }
+    .pest-cell.social       { border-color: #e53935; }
+    .pest-cell.technological { border-color: #0071e3; }
+    .pest-cell h4 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+    .pest-cell p { font-size: 14px; line-height: 1.65; color: var(--mid); margin: 0; }
+
+    /* Market stats */
+    .stat-callout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 32px 0;
+      padding: 32px;
+      background: var(--light);
+      border-radius: var(--radius);
+    }
+    .stat-item { flex: 1; min-width: 130px; text-align: center; }
+    .stat-item .number { font-size: clamp(26px, 4vw, 40px); font-weight: 700; letter-spacing: -0.03em; color: var(--black); }
+    .stat-item .desc { font-size: 13px; color: var(--subtle); margin-top: 4px; line-height: 1.4; }
+
+    /* Dividers */
+    .rule { height: 1px; background: rgba(0,0,0,0.08); margin: 64px 0; }
+
+    /* Footer */
+    footer { padding: 36px 24px; background: var(--light); border-top: 1px solid rgba(0,0,0,0.1); text-align: center; }
+    footer p { font-size: 13px; color: var(--subtle); margin-bottom: 8px; }
+    .footer-nav { position: static; height: auto; background: transparent; border: none; box-shadow: none; backdrop-filter: none; }
+    .footer-nav a { font-size: 13px; color: var(--subtle); text-decoration: none; margin: 0 10px; }
+    .footer-nav a:hover { color: var(--black); }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal-delay { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    @media (max-width: 860px) {
+      .nav-links { display: none; }
+      .nav-actions a { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: block; }
+      .competitor-grid, .swot-grid, .pest-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 1180px) {
+      .nav-links a { padding: 5px 6px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Nav ─── -->
+  <nav class="site-nav" aria-label="Main">
+    <div class="nav-inner">
+      <a class="nav-logo" href="index.html" aria-label="Home">
+        <img src="apple-logo-black.svg" alt="" width="18" height="22" decoding="async" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="company-profile.html">Company Profile</a></li>
+        <li><a href="marketing-situation.html" class="active">Current Marketing Situation</a></li>
+        <li><a href="index.html#objectives">Objectives</a></li>
+        <li><a href="index.html#target">Target Market</a></li>
+        <li><a href="index.html#strategy">Market Strategy</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="#" aria-label="Search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18"><path d="M15.27 14.21L11.73 10.67A5.49 5.49 0 1 0 10.67 11.73l3.54 3.54a.75.75 0 0 0 1.06-1.06zM3 7.5a4.5 4.5 0 1 1 4.5 4.5A4.5 4.5 0 0 1 3 7.5z"/></svg>
+        </a>
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" class="ml">Home</a>
+    <a href="company-profile.html" class="ml">Company Profile</a>
+    <a href="marketing-situation.html" class="ml">Current Marketing Situation</a>
+    <a href="index.html#objectives" class="ml">Objectives</a>
+    <a href="index.html#target" class="ml">Target Market</a>
+    <a href="index.html#strategy" class="ml">Market Strategy</a>
+  </div>
+
+  <!-- ─── Page Hero ─── -->
+  <div class="page-hero">
+    <p class="breadcrumb"><a href="index.html">Apple Smart Mirror</a> &rsaquo; Current Marketing Situation</p>
+    <p class="label">How We Reach You</p>
+    <h1>Current Marketing Situation</h1>
+  </div>
+
+  <!-- ─── Table of Contents ─── -->
+  <div class="toc-wrap reveal">
+    <div class="toc">
+      <h3>On this page</h3>
+      <ol>
+        <li><a href="#industry">Industry Overview</a></li>
+        <li><a href="#competitive">Competitive Analysis</a></li>
+        <li><a href="#swot">SWOT Analysis</a></li>
+        <li><a href="#pest">PEST Analysis</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ─── Content ─── -->
+  <main class="page-content">
+
+    <a href="index.html" class="back-link">Back to Home</a>
+
+    <!-- ─ Industry Overview ─ -->
+    <div class="content-block reveal" id="industry">
+      <p class="section-label">Section 01</p>
+      <h2>Industry Overview</h2>
+
+      <div class="stat-callout reveal">
+        <div class="stat-item">
+          <div class="number">$2.95B</div>
+          <div class="desc">Global Smart Mirror market, 2025</div>
+        </div>
+        <div class="stat-item">
+          <div class="number">15.03%</div>
+          <div class="desc">CAGR through 2034</div>
+        </div>
+        <div class="stat-item">
+          <div class="number">$10.37B</div>
+          <div class="desc">Projected market size, 2034</div>
+        </div>
+        <div class="stat-item">
+          <div class="number">$1.1B</div>
+          <div class="desc">North America share, 2025</div>
+        </div>
+      </div>
+
+      <p>The global Smart Mirror market was $2.95 billion in 2025 and is expected to grow at a 15.03% CAGR to $10.37 billion in 2034. North America holds the largest market share at $1.1 billion as of 2025 (Fortune Business Insights, 2026). Apple Smart Mirror will look to launch in North America, where the largest share of the market is located, and gradually expand to other countries.</p>
+      <p>The growth of the adjacent Smart Home market further favors the Smart Mirror segment. The Smart Home market was valued at $140.21 billion in 2025 and is projected to grow at a 10.69% CAGR (Technavio, 2025). Consumers are shifting from buying single products to buying ecosystems. There is a growing trend toward wellness-integrated devices — and integrated wellness platforms achieve 35% higher user engagement than non-connected systems (Technavio, 2025).</p>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- ─ Competitive Analysis ─ -->
+    <div class="content-block reveal" id="competitive">
+      <p class="section-label">Section 02</p>
+      <h2>Competitive Analysis</h2>
+
+      <p>No player in this market currently delivers a mix of health integration, a large ecosystem like Apple's, and the kind of design that Apple Smart Mirror would offer. However, several products are currently trying to gain a foothold in this space.</p>
+
+      <div class="competitor-grid">
+        <div class="competitor-card reveal">
+          <div class="name">Withings Omnia</div>
+          <span class="tag tag-primary">Primary Competitor</span>
+          <p>Unveiled at CES 2025. An AI-powered mirror measuring heart health and sleep patterns via the Withings ecosystem. Yet to gain significant traction and operates within a far smaller ecosystem than Apple's, giving Apple a clear competitive advantage.</p>
+        </div>
+        <div class="competitor-card reveal reveal-delay">
+          <div class="name">Samsung × Amorepacific</div>
+          <span class="tag tag-secondary">Secondary Competitor</span>
+          <p>Launched at CES 2025. An AI-powered beauty mirror that analyzes skin features and recommends personalized skincare routines. Targets the beauty segment, not health monitoring, and does not integrate cross-platform data.</p>
+        </div>
+        <div class="competitor-card reveal reveal-delay-2">
+          <div class="name">Electric Mirror</div>
+          <span class="tag tag-minor">Indirect Competitor</span>
+          <p>An established market leader found primarily in hotels, fitness centers, and spas. Offers basic mirror features with ambient lighting controls. No health tracking, AI, or smart features comparable to Apple Smart Mirror.</p>
+        </div>
+        <div class="competitor-card reveal reveal-delay-3">
+          <div class="name">Seura</div>
+          <span class="tag tag-minor">Indirect Competitor</span>
+          <p>Similar positioning to Electric Mirror. Focuses on ambient display and hospitality settings. No health tracking integration or ecosystem connectivity — well behind what Apple Smart Mirror would offer.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- ─ SWOT ─ -->
+    <div class="content-block reveal" id="swot">
+      <p class="section-label">Section 03</p>
+      <h2>SWOT Analysis</h2>
+
+      <div class="swot-grid">
+        <div class="swot-cell strengths reveal">
+          <h4>Strengths</h4>
+          <ul>
+            <li>Highest brand loyalty and recognition in tech</li>
+            <li>Over 90% iPhone customer retention rate</li>
+            <li>Deep Apple Health data available at launch</li>
+            <li>Apple Stores as ideal Smart Mirror demo venues</li>
+            <li>Strong privacy reputation — users willing to share health data</li>
+            <li>40+ years manufacturing experience and global distribution</li>
+          </ul>
+        </div>
+        <div class="swot-cell weaknesses reveal reveal-delay">
+          <h4>Weaknesses</h4>
+          <ul>
+            <li>No prior experience in smart mirror manufacturing or retail</li>
+            <li>Premium pricing locks out the mass market</li>
+            <li>Limited accessibility in lower-income markets</li>
+            <li>Discretionary purchase — sensitive to economic downturns</li>
+          </ul>
+        </div>
+        <div class="swot-cell opportunities reveal">
+          <h4>Opportunities</h4>
+          <ul>
+            <li>Smart mirror market growing at 15.03% CAGR</li>
+            <li>No dominant competitor matching Apple's offering</li>
+            <li>Existing Apple Watch user base as a ready audience</li>
+            <li>Post-Covid rise in proactive self-health monitoring</li>
+          </ul>
+        </div>
+        <div class="swot-cell threats reveal reveal-delay">
+          <h4>Threats</h4>
+          <ul>
+            <li>Consumer privacy concerns around health data collection</li>
+            <li>Advanced components increase manufacturing costs</li>
+            <li>Current competitors may gain traction before launch</li>
+            <li>New market entrants could rapidly innovate</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- ─ PEST ─ -->
+    <div class="content-block reveal" id="pest">
+      <p class="section-label">Section 04</p>
+      <h2>PEST Analysis</h2>
+
+      <div class="pest-grid">
+        <div class="pest-cell political reveal">
+          <h4>Political</h4>
+          <p>Apple will need to navigate regulatory requirements for the Smart Mirror. Apple has extensive experience in these areas and has already obtained FDA approvals for features like ECG and blood pressure monitoring on Apple Watch. Since Smart Mirror primarily displays data collected from pre-approved Apple Watch, it will face fewer regulatory challenges. Apple must also comply with privacy laws governing how health data is stored and shared.</p>
+        </div>
+        <div class="pest-cell economic reveal reveal-delay">
+          <h4>Economic</h4>
+          <p>Apple Smart Mirror is a discretionary purchase. According to the World Bank 2025 report, global disposable income is projected to increase, supporting higher consumer spending on premium wellness technology. Apple's existing customer base consists of premium users who are less price-sensitive, allowing Apple to invest more in quality. Apple's financial strength also means R&amp;D investment will not constrain other business areas.</p>
+        </div>
+        <div class="pest-cell social reveal">
+          <h4>Social</h4>
+          <p>Health awareness has increased significantly since the Covid pandemic, driving greater trust in home health technology. The Apple Smart Mirror integrates seamlessly into this behavioral shift. Younger customers — who already use multiple Apple devices — are likely early adopters. The Smart Mirror fits perfectly within the broader move from reactive to proactive wellness trends.</p>
+        </div>
+        <div class="pest-cell technological reveal reveal-delay">
+          <h4>Technological</h4>
+          <p>Continuous innovation in AI favors Apple Smart Mirror. Apple's integrated ecosystem offers a competitive advantage over competitors relying on fragmented systems. However, the high pace of technological progress means Apple must continuously innovate to avoid being overtaken by competitors that can quickly introduce superior alternatives. Ongoing R&amp;D investment will be essential to maintaining a technology lead.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ─── Footer ─── -->
+  <footer>
+    <p>Copyright &copy; 2026 Apple Smart Mirror. All rights reserved.</p>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Contact</a>
+    </nav>
+  </footer>
+
+  <script>
+    const ham = document.getElementById('hamburger');
+    const mob = document.getElementById('mobileMenu');
+    ham.addEventListener('click', () => {
+      const open = ham.classList.toggle('open');
+      mob.classList.toggle('open', open);
+    });
+    document.querySelectorAll('.ml').forEach(a => a.addEventListener('click', () => {
+      ham.classList.remove('open');
+      mob.classList.remove('open');
+    }));
+
+    const revIO = new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => revIO.observe(el));
+  </script>
+</body>
+</html>
